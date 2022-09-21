@@ -1,7 +1,5 @@
 public with sharing class NotificationCreatorBatch{
-    public NotificationCreatorBatch() {
 
-    }
     public static void execute(){
         Notification__c[] notifs = new List<Notification__c>();
         for(Notification_Config__c config : [SELECT Id, Title__c, Description__c, Criteria__c, Source_Object__c,
