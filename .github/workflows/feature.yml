@@ -1,0 +1,49 @@
+# CI-Script to handle deployments from the feature or master branches to the partial
+# Original script by Simon Kuhnt, adjusted and refined for general usage by Torben Sieber
+name: Deploy to Partial
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on pull request against the partial branch
+  # This will run after successful merging of the pull request, if want to do it on opening use 'pull_request_target'
+  pull_request:
+    types:
+      - opened
+    branches:
+      - 'partial'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+    deploy-partial:
+      # The type of runner that the job will run on
+      runs-on: ubuntu-latest
+      environment: Staging
+      # Steps represent a sequence of tasks that will be executed as part of the job
+      steps:
+        # Install Salesforce CLI
+        - name: 'Install Salesforce CLI'
+          run: |
+              wget https://developer.salesforce.com/media/salesforce-cli/sfdx-linux-amd64.tar.xz
+              mkdir sfdx-cli
+              tar xJf sfdx-linux-amd64.tar.xz -C sfdx-cli --strip-components 1
+              ./sfdx-cli/install
+
+        # Checkout the source code
+        - name: 'Checkout source code'
+          uses: actions/checkout@v2
+
+        # Store secret for Partial
+        - name: 'Populate auth file with Partial secret'
+          shell: bash
+          run: echo ${{ secrets.PARTIAL_SFDX_URL}} > ./PARTIAL_SFDX_URL.txt
+
+        # Authenticate Partial
+        - name: 'Authenticate Partial'
+          run: sfdx auth:sfdxurl:store -f ./PARTIAL_SFDX_URL.txt -a partial -d
+
+        # Deployment to Partial
+        - name: 'Deploy in Partial'
+          run: sfdx force:source:deploy -p force-app -u partial -l RunLocalTests -w 33 --loglevel info

@@ -1,0 +1,47 @@
+# CI-Script to handle deployments from the partial to the production
+# Original script by Simon Kuhnt, adjusted and refined for general usage by Torben Sieber
+name: Deploy to Production
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on pull requests against production
+  # This will run after successful merging of the pull request, if want to do it on opening use 'pull_request_target'
+  pull_request:
+    types:
+      - opened
+    branches:
+      - 'production'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+    deployment-production:
+        runs-on: ubuntu-latest
+        environment: Production
+        steps:
+            # Install Salesforce CLI
+            - name: 'Install Salesforce CLI'
+              run: |
+                  wget https://developer.salesforce.com/media/salesforce-cli/sfdx-linux-amd64.tar.xz
+                  mkdir sfdx-cli
+                  tar xJf sfdx-linux-amd64.tar.xz -C sfdx-cli --strip-components 1
+                  ./sfdx-cli/install
+
+            # Checkout the source code
+            - name: 'Checkout source code'
+              uses: actions/checkout@v2
+
+            # Store secret for dev hub
+            - name: 'Populate auth file with production secret'
+              shell: bash
+              run: echo ${{ secrets.PROD_SFDX_URL}} > ./PROD_SFDX_URL.txt
+
+            # Authenticate dev hub
+            - name: 'Authenticate Dev Hub'
+              run: sfdx auth:sfdxurl:store -f ./PROD_SFDX_URL.txt -a production -d
+
+            # Deployment to Production
+            - name: 'Production Deployment'
+              run: sfdx force:source:deploy -p force-app -u production -w 33 --loglevel info -l RunLocalTests
