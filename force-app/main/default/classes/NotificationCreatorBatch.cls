@@ -19,7 +19,6 @@ public with sharing class NotificationCreatorBatch{
                 notifs.add(item);
             }
         }
-
         INSERT notifs;
     }
 
@@ -30,7 +29,6 @@ public with sharing class NotificationCreatorBatch{
             while (m.find() == true) {   
                 System.debug('found :: '+m.group(0));
                 System.debug('found :: '+m.group(1));
-
                 convertOutput = m.replaceFirst('#' + 'AAA' + '#');
                 inputString = convertOutput;
             } 
