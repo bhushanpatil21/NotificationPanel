@@ -1,0 +1,9 @@
+.tab-container {
+    display:flex;
+    align-items: center;
+    justify-content: center;
+    
+}
+.tab-container li{
+  align-self: center;
+}

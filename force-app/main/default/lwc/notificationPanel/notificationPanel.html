@@ -1,0 +1,28 @@
+<template>
+
+    <div class="slds-card">   
+        <!--  <div id="count1" class="count">3</div> -->   
+            <lightning-tabset>
+                <template if:true={infos}>
+                    <template for:each={infos} for:item="info">
+                       
+                        <lightning-tab key={info} label={info.type} icon-name="standard:date_input">
+                            
+                            <div class="slds-p-left_small slds-p-right_small">
+                                <template for:each={info.notifications} for:item="item" for:index="index">
+                                    <c-notification-tile key={item.title} index={index} type={info.type} item={item} oncleared={handleNotificationClear}></c-notification-tile>                          
+                                </template>
+                            </div>
+                        </lightning-tab>
+                        
+                    </template>
+                   
+                </template>
+                <template if:true={error}>
+                   error 
+                </template>
+                
+            </lightning-tabset>
+
+    </div>
+</template>
